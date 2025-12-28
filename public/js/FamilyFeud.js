@@ -4,9 +4,11 @@ var app = {
     version: 1,
     role: "player",
     socket: io.connect(),
-    jsonFile: "../public/data/FamilyFeud_Questions.json",
+    jsonFile: "../public/data/MyOwnQuestions.json",
     currentQ: 0,
-    wrong:0,
+    wrong: 0,
+    audioFlip: new Audio('/public/audio/flip.mp3'),
+    audioWrong: new Audio('/public/audio/wrong.mp3'),
     board: $(`<div class='gameBoard'>
 
                 <!--- Scores --->
@@ -46,7 +48,7 @@ var app = {
                 </div>
 
                 </div>`),
-    
+
     // Utility functions
     shuffle: (array) => {
         var currentIndex = array.length,
@@ -205,6 +207,10 @@ var app = {
         console.log(n);
         var card = $('[data-id="' + n + '"]');
         var flipped = $(card).data("flipped");
+
+        app.audioFlip.currentTime = 0;
+        app.audioFlip.play();
+
         var cardRotate = (flipped) ? 0 : -180;
         TweenLite.to(card, 1, {
             rotationX: cardRotate,
@@ -214,15 +220,19 @@ var app = {
         $(card).data("flipped", flipped);
         app.getBoardScore()
     },
-    wrongAnswer:()=>{
+    wrongAnswer: () => {
         app.wrong++
-        console.log("wrong: "+ app.wrong )
+        console.log("wrong: " + app.wrong)
         var wrong = app.board.find(".wrongBoard")
-        $(wrong).find("img:nth-child("+app.wrong+")").show()
+
+        app.audioWrong.currentTime = 0;
+        app.audioWrong.play();
+
+        $(wrong).find("img:nth-child(" + app.wrong + ")").show()
         $(wrong).show()
-        setTimeout(() => { 
-            $(wrong).hide(); 
-        }, 1000); 
+        setTimeout(() => {
+            $(wrong).hide();
+        }, 1000);
 
     },
 
@@ -253,17 +263,17 @@ var app = {
                 break;
         }
     },
-    
+
     // Inital function
     init: () => {
 
         $.getJSON(app.jsonFile, app.jsonLoaded);
 
-        app.board.find('#hostBTN'    ).on('click', app.makeHost);
-        app.board.find('#awardTeam1' ).on('click', { trigger: 'awardTeam1' }, app.talkSocket);
-        app.board.find('#awardTeam2' ).on('click', { trigger: 'awardTeam2' }, app.talkSocket);
-        app.board.find('#newQuestion').on('click', { trigger: 'newQuestion'}, app.talkSocket);
-        app.board.find('#wrong'      ).on('click', { trigger: 'wrong'      }, app.talkSocket);
+        app.board.find('#hostBTN').on('click', app.makeHost);
+        app.board.find('#awardTeam1').on('click', { trigger: 'awardTeam1' }, app.talkSocket);
+        app.board.find('#awardTeam2').on('click', { trigger: 'awardTeam2' }, app.talkSocket);
+        app.board.find('#newQuestion').on('click', { trigger: 'newQuestion' }, app.talkSocket);
+        app.board.find('#wrong').on('click', { trigger: 'wrong' }, app.talkSocket);
 
         app.socket.on('listening', app.listenSocket)
     }
