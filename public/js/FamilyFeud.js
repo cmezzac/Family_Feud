@@ -4,8 +4,6 @@ var app = {
     version: 1,
     role: "player",
     socket: io.connect(),
-    jsonFile: "../public/data/MyOwnQuestions.json",
-    currentQ: 0,
     wrong: 0,
     audioFlip: new Audio('/public/audio/flip.mp3'),
     audioWrong: new Audio('/public/audio/wrong.mp3'),
@@ -45,6 +43,7 @@ var app = {
                         <img alt="not on board" src="/public/img/Wrong.svg"/>
                     </div>
                     <div id='awardTeam2'  class='button' data-team='2' >Award Team 2</div>
+                    <div id='fastMoneyBTN' class='button'>Fast Money</div>
                 </div>
 
                 </div>`),
@@ -63,18 +62,11 @@ var app = {
         }
         return array;
     },
-    jsonLoaded: (data) => {
-        app.allData = data;
-        app.questions = Object.keys(data);
-        app.makeQuestion(app.currentQ);
-        app.board.find('.host').hide();
-        $('body').append(app.board);
-    },
 
     // Action functions
-    makeQuestion: (eNum) => {
-        var qText = app.questions[eNum];
-        var qAnswr = app.allData[qText];
+    // The server picks a random, non-repeating question and sends its answers
+    makeQuestion: (qText, qAnswr) => {
+        if (!qText || !qAnswr) return;
 
         var qNum = qAnswr.length;
         qNum = (qNum < 8) ? 8 : qNum;
@@ -190,9 +182,8 @@ var app = {
             ease: Power3.easeOut
         });
     },
-    changeQuestion: () => {
-        app.currentQ++;
-        app.makeQuestion(app.currentQ);
+    changeQuestion: (data) => {
+        app.makeQuestion(data.question, data.answers);
     },
     makeHost: () => {
         app.role = "host";
@@ -244,7 +235,8 @@ var app = {
         console.log(data);
         switch (data.trigger) {
             case "newQuestion":
-                app.changeQuestion();
+            case "setQuestion":
+                app.changeQuestion(data);
                 break;
             case "awardTeam1":
                 app.awardPoints(1);
@@ -267,7 +259,8 @@ var app = {
     // Inital function
     init: () => {
 
-        $.getJSON(app.jsonFile, app.jsonLoaded);
+        app.board.find('.host').hide();
+        $('body').append(app.board);
 
         app.board.find('#hostBTN').on('click', app.makeHost);
         app.board.find('#awardTeam1').on('click', { trigger: 'awardTeam1' }, app.talkSocket);
