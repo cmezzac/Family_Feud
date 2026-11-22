@@ -3,11 +3,11 @@ console.clear()
 var app = {
     version: 1,
     role: "player",
-    socket: io.connect(),
+    socket: io.connect('/family-feud'),
     wrong: 0,
-    audioFlip: new Audio('/public/audio/flip.mp3'),
-    audioWrong: new Audio('/public/audio/wrong.mp3'),
-    audioTheme: new Audio('/public/audio/theme_song.mp3'),
+    audioFlip: new Audio('/games/family-feud/audio/flip.mp3'),
+    audioWrong: new Audio('/games/family-feud/audio/wrong.mp3'),
+    audioTheme: new Audio('/games/family-feud/audio/theme_song.mp3'),
     THEME_SECONDS: 7,
     themeTimer: null,
     themeLeft: 7,
@@ -44,9 +44,9 @@ var app = {
                 </div>
                 <!--- Wrong --->
                 <div class='wrongX wrongBoard'>
-                    <img alt="not on board" src="/public/img/Wrong.svg"/>
-                    <img alt="not on board" src="/public/img/Wrong.svg"/>
-                    <img alt="not on board" src="/public/img/Wrong.svg"/>
+                    <img alt="not on board" src="/games/family-feud/img/Wrong.svg"/>
+                    <img alt="not on board" src="/games/family-feud/img/Wrong.svg"/>
+                    <img alt="not on board" src="/games/family-feud/img/Wrong.svg"/>
                 </div>
 
                 <!--- Buttons --->
@@ -55,7 +55,7 @@ var app = {
                     <div id='awardTeam1'  class='button' data-team='1'>Award Team 1</div>
                     <div id='newQuestion' class='button'>New Question</div>
                     <div id="wrong"       class='button wrongX'>
-                        <img alt="not on board" src="/public/img/Wrong.svg"/>
+                        <img alt="not on board" src="/games/family-feud/img/Wrong.svg"/>
                     </div>
                     <div id='awardTeam2'  class='button' data-team='2' >Award Team 2</div>
                     <div id='fastMoneyBTN' class='button'>Fast Money</div>

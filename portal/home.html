@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Game Night</title>
+  <link rel="stylesheet" href="/portal/portal.css">
+</head>
+<body>
+  <header class="top">
+    <h1>🎲 Game Night</h1>
+    <form method="post" action="/logout"><button class="link-btn" type="submit">Log out</button></form>
+  </header>
+
+  <main>
+    <h2>Select which game</h2>
+    <div class="games" id="games"></div>
+  </main>
+
+  <div class="loading" id="loading" role="status" aria-live="polite">
+    <div class="emoji" id="loadingEmoji"></div>
+    <h2 id="loadingName"></h2>
+    <div class="bar"><span id="bar"></span></div>
+    <div class="status" id="loadingStatus"></div>
+  </div>
+
+  <script src="/portal/session.js"></script>
+  <script>
+    var LOAD_MS = 3000;
+    var MESSAGES = ['Warming up the buzzers…', 'Surveying 100 people…', 'Shuffling questions…', 'Almost there…'];
+
+    function play(game) {
+      document.getElementById('loadingEmoji').textContent = game.emoji;
+      document.getElementById('loadingName').textContent = 'Loading ' + game.name;
+      document.getElementById('loading').classList.add('show');
+
+      var bar = document.getElementById('bar');
+      var status = document.getElementById('loadingStatus');
+      var start = performance.now();
+      (function tick(now) {
+        var t = Math.min(1, (now - start) / LOAD_MS);
+        bar.style.width = (t * 100) + '%';
+        status.textContent = MESSAGES[Math.min(MESSAGES.length - 1, Math.floor(t * MESSAGES.length))];
+        if (t < 1) requestAnimationFrame(tick);
+        else location.href = game.url;
+      })(start);
+    }
+
+    fetch('/api/games', { credentials: 'same-origin' })
+      .then(function (r) {
+        if (r.status === 401) { location.href = '/login'; throw new Error('expired'); }
+        return r.json();
+      })
+      .then(function (games) {
+        var list = document.getElementById('games');
+        games.forEach(function (g) {
+          var btn = document.createElement('button');
+          btn.className = 'game';
+          btn.type = 'button';
+          btn.innerHTML = '<div class="emoji"></div><h3></h3><p></p>';
+          btn.querySelector('.emoji').textContent = g.emoji;
+          btn.querySelector('h3').textContent = g.name;
+          btn.querySelector('p').textContent = g.description;
+          btn.addEventListener('click', function () { play(g); });
+          list.appendChild(btn);
+        });
+      });
+  </script>
+</body>
+</html>

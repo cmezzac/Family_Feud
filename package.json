@@ -16,7 +16,7 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "public/data/*"
+      "games/*/public/data/*"
     ]
   }
 }

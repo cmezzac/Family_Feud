@@ -27,11 +27,11 @@ Listening on 8080
    * go to new questions
 
 ### Default instance:
-![Default instance](public/img/Default.jpg)
+![Default instance](games/family_feud/public/img/Default.jpg)
 
 ### Host instance:
-![Host instance](public/img/Host.jpg)
+![Host instance](games/family_feud/public/img/Host.jpg)
 
 ### Audience instance:
-![Host instance](public/img/Audience.jpg)
+![Host instance](games/family_feud/public/img/Audience.jpg)
 
