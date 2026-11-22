@@ -7,6 +7,21 @@ var app = {
     wrong: 0,
     audioFlip: new Audio('/public/audio/flip.mp3'),
     audioWrong: new Audio('/public/audio/wrong.mp3'),
+    audioTheme: new Audio('/public/audio/theme_song.mp3'),
+    THEME_SECONDS: 7,
+    themeTimer: null,
+    themeLeft: 7,
+    themeStarted: 0,
+    themeBtn: $(`<div id='themeBTN' title='Play theme song'>
+                    <svg class='iconPlay' viewBox='0 0 24 24' aria-hidden='true'>
+                        <path d='M4 9v6h4l5 4V5L8 9H4z'/>
+                        <path d='M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'/>
+                    </svg>
+                    <svg class='iconPause' viewBox='0 0 24 24' aria-hidden='true'>
+                        <rect x='6' y='5' width='4' height='14' rx='1'/>
+                        <rect x='14' y='5' width='4' height='14' rx='1'/>
+                    </svg>
+                </div>`),
     board: $(`<div class='gameBoard'>
 
                 <!--- Scores --->
@@ -227,6 +242,43 @@ var app = {
 
     },
 
+    // Theme song: plays for THEME_SECONDS. Pausing keeps the spot, so the
+    // next click resumes with the time that was left.
+    themePlay: () => {
+        if (app.themeTimer) return;
+        if (app.themeLeft <= 0) app.themeReset();
+        app.themeStarted = Date.now();
+        app.audioTheme.play().catch(() => {});
+        app.themeTimer = setTimeout(() => {
+            app.themePause();
+            app.themeReset();
+        }, app.themeLeft * 1000);
+        app.themeBtn.addClass('playing').attr('title', 'Pause theme song');
+    },
+    themePause: () => {
+        if (!app.themeTimer) return;
+        clearTimeout(app.themeTimer);
+        app.themeTimer = null;
+        app.themeLeft -= (Date.now() - app.themeStarted) / 1000;
+        app.audioTheme.pause();
+        app.themeBtn.removeClass('playing').attr('title', 'Play theme song');
+    },
+    themeReset: () => {
+        app.audioTheme.currentTime = 0;
+        app.themeLeft = app.THEME_SECONDS;
+    },
+    themeClick: () => {
+        var action = app.themeTimer ? 'pause' : 'play';
+        // The host's button plays the song on every screen; anyone else
+        // just hears it on their own screen.
+        if (app.role == "host") app.socket.emit("talking", { trigger: 'theme', action: action });
+        else app.themeAction(action);
+    },
+    themeAction: (action) => {
+        if (action == 'pause') app.themePause();
+        else app.themePlay();
+    },
+
     // Socket Test
     talkSocket: (e) => {
         if (app.role == "host") app.socket.emit("talking", e.data);
@@ -253,6 +305,9 @@ var app = {
             case "wrong":
                 app.wrongAnswer()
                 break;
+            case "theme":
+                app.themeAction(data.action);
+                break;
         }
     },
 
@@ -261,6 +316,8 @@ var app = {
 
         app.board.find('.host').hide();
         $('body').append(app.board);
+        $('body').append(app.themeBtn);
+        app.themeBtn.on('click', app.themeClick);
 
         app.board.find('#hostBTN').on('click', app.makeHost);
         app.board.find('#awardTeam1').on('click', { trigger: 'awardTeam1' }, app.talkSocket);
