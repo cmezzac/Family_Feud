@@ -497,3 +497,29 @@ width: 75px;
   color: #ffb3b3;
   font-size: 16px;
 }
+
+/* Theme song button */
+#themeBTN {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(to bottom, #7db9e8 0%, #207cca 49%, #2989d8 50%, #1e5799 100%);
+  box-shadow: 0 1px 24px 1px rgba(0, 0, 0, 0.48);
+  transition: transform 0.15s ease;
+}
+#themeBTN:hover { transform: scale(1.08); }
+#themeBTN svg { width: 28px; height: 28px; fill: currentColor; }
+#themeBTN .iconPause,
+#themeBTN.playing .iconPlay { display: none; }
+#themeBTN.playing .iconPause { display: block; }
